@@ -1,72 +1,58 @@
-<!-- app/Http/Controllers/DoctorController.php -->
+<!-- Doctor Full REST API -->
 <?php
 
 namespace App\Http\Controllers;
-
 use App\Models\Doctor;
 use Illuminate\Http\Request;
 
 class DoctorController extends Controller
 {
-    // Display a listing of the doctors
+    // GET /api / doctors - Get all doctors
     public function index()
     {
         $doctors = Doctor::all();
-        return view('doctors.index', compact('doctors'));
+        return response()->json($doctors);
     }
 
-    // Show the form for creating a new doctor
-    public function create()
-    {
-        return view('doctors.create');
-    }
-
-    // Store a newly created doctor in storage
+    // POST /api / doctors - Create a new doctor
     public function store(Request $request)
     {
-        $request->validate([
-            'first_name' => 'required|string|max:50',
-            'last_name' => 'required|string|max:50',
-            'specialization' => 'nullable|string|max:100',
-            'phone' => 'nullable|string|max:15',
-            'email' => 'nullable|email|max:100',
-            'consultation_fee' => 'nullable|numeric',
-        ]);
-        Doctor::create($request->all());
-        return redirect()->route('doctors.index')->with('success', 'Doctor created successfully.');
-    }
-    // Display the specified doctor
-    public function show(Doctor $doctor)
-    {
-        return view('doctors.show', compact('doctor'));
-    }
-    // Show the form for editing the specified doctor
-    public function edit(Doctor $doctor)
-    {
-        return view('doctors.edit', compact('doctor'));
+        $doctor = Doctor::create($request->all());
+        return response()->json($doctor, 201);
     }
 
-    // Update the specified doctor in storage
-    public function update(Request $request, Doctor $doctor)
+    // GET /api / doctors / {id} - Get a doctor by ID
+    public function show($id)
     {
-        $request->validate([
-            'first_name' => 'required|string|max:50',
-            'last_name' => 'required|string|max:50',
-            'specialization' => 'nullable|string|max:100',
-            'phone' => 'nullable|string|max:15',
-            'email' => 'nullable|email|max:100',
-            'consultation_fee' => 'nullable|numeric',
-        ]);
-        $doctor->update($request->all());
-        return redirect()->route('doctors.index')->with('success', 'Doctor updated successfully.');
+        $doctor = Doctor::find($id);
+        if ($doctor) {
+            return response()->json($doctor);
+        } else {
+            return response()->json(["message" => "Doctor not found."], 404);
+        }
     }
 
-    // Remove the specified doctor from storage
-    public function destroy(Doctor $doctor)
+    // PUT /api / doctors / {id} - Update a doctor by ID
+    public function update(Request $request, $id)
     {
-        $doctor->delete();
-        return redirect()->route('doctors.index')->with('success', 'Doctor deleted successfully.');
+        $doctor = Doctor::find($id);
+        if ($doctor) {
+            $doctor->update($request->all());
+            return response()->json($doctor);
+        } else {
+            return response()->json(["message" => "Doctor not found."], 404);
+        }
+    }
+
+    // DELETE /api / doctors / {id} - Delete a doctor by ID
+    public function destroy($id)
+    {
+        $doctor = Doctor::find($id);
+        if ($doctor) {
+            $doctor->delete();
+            return response()->json(["message" => "Doctor deleted."]);
+        } else {
+            return response()->json(["message" => "Doctor not found."], 404);
+        }
     }
 }
-
-

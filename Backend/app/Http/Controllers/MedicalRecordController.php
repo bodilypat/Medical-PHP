@@ -1,96 +1,57 @@
-<!-- 
- medical_record_id INT AUTO_INCREMENT PRIMARY KEY,
-    record_id INT AUTO_INCREMENT PRIMARY KEY,
-    patient_id INT NOT NULL,
-    doctor_id INT NOT NULL  ,
-    diagnosis TEXT,
-    treatment TEXT,
-    prescription TEXT,
-    notes TEXT,
-    visit_date DATE,
-    FOREIGN KEY (patient_id) REFERENCES patients(patient_id) ON DELETE CASCADE,
-    FOREIGN KEY (doctor_id) REFERENCES doctors(doctor_id) ON DELETE CASCADE
- -->
+<!-- Medical Record Full REST API -->
 <?php
-
 namespace App\Http\Controllers;
-
 use App\Models\MedicalRecord;
-use App\Models\Patient;
-use App\Models\Doctor;
 use Illuminate\Http\Request;
 
 class MedicalRecordController extends Controller
 {
-    // Display a listing of the medical records
+    // GET /api / medical-records - Get all medical records
     public function index()
     {
-        $medicalRecords = MedicalRecord::with(['patient', 'doctor'])->get();
-        return view('medical_records.index', compact('medicalRecords'));
+        $medicalRecords = MedicalRecord::all();
+        return response()->json($medicalRecords);
     }
 
-    // Show the form for creating a new medical record
-    public function create()
-    {
-        $patients = Patient::all();
-        $doctors = Doctor::all();
-        return view('medical_records.create', compact('patients', 'doctors'));
-    }
-
-    // Store a newly created medical record in storage
+    // POST /api / medical-records - Create a new medical record
     public function store(Request $request)
     {
-        $request->validate([
-            'patient_id' => 'required|exists:patients,patient_id',
-            'doctor_id' => 'required|exists:doctors,doctor_id',
-            'diagnosis' => 'nullable|string',
-            'treatment' => 'nullable|string',
-            'prescription' => 'nullable|string',
-            'notes' => 'nullable|string',
-            'visit_date' => 'nullable|date',
-        ]);
-        MedicalRecord::create($request->all());
-        return redirect()->route('medical_records.index')->with('success', 'Medical record created successfully.');
+        $medicalRecord = MedicalRecord::create($request->all());
+        return response()->json($medicalRecord, 201);
     }
 
-    // Display the specified medical record
-    public function show(MedicalRecord $medicalRecord)
+    // GET /api / medical-records / {id} - Get a medical record by ID
+    public function show($id)
     {
-        $medicalRecord->load(['patient', 'doctor']);
-        return view('medical_records.show', compact('medicalRecord'));
+        $medicalRecord = MedicalRecord::find($id);
+        if ($medicalRecord) {
+            return response()->json($medicalRecord);
+        } else {
+            return response()->json(["message" => "Medical record not found."], 404);
+        }
     }
 
-    // Show the form for editing the specified medical record
-    public function edit(MedicalRecord $medicalRecord)
+    // PUT /api / medical-records / {id} - Update a medical record by ID
+    public function update(Request $request, $id)
     {
-        $patients = Patient::all();
-        $doctors = Doctor::all();
-        return view('medical_records.edit', compact('medicalRecord', 'patients', 'doctors'));
+        $medicalRecord = MedicalRecord::find($id);
+        if ($medicalRecord) {
+            $medicalRecord->update($request->all());
+            return response()->json($medicalRecord);
+        } else {
+            return response()->json(["message" => "Medical record not found."], 404);
+        }
     }
 
-    // Update the specified medical record in storage
-    public function update(Request $request, MedicalRecord $medicalRecord)
+    // DELETE /api / medical-records / {id} - Delete a medical record by ID
+    public function destroy($id)
     {
-        $request->validate([
-            'patient_id' => 'required|exists:patients,patient_id',
-            'doctor_id' => 'required|exists:doctors,doctor_id',
-            'diagnosis' => 'nullable|string',
-            'treatment' => 'nullable|string',
-            'prescription' => 'nullable|string',
-            'notes' => 'nullable|string',
-            'visit_date' => 'nullable|date',
-        ]);
-        $medicalRecord->update($request->all());
-        return redirect
-            ->route('medical_records.index')
-            ->with('success', 'Medical record updated successfully.');
+        $medicalRecord = MedicalRecord::find($id);
+        if ($medicalRecord) {
+            $medicalRecord->delete();
+            return response()->json(["message" => "Medical record deleted."]);
+        } else {
+            return response()->json(["message" => "Medical record not found."], 404);
+        }
     }
-
-    // Remove the specified medical record from storage
-    public function destroy(MedicalRecord $medicalRecord)
-    {
-        $medicalRecord->delete();
-        return redirect()->route('medical_records.index')->with('success', 'Medical record deleted successfully.');
-    }   
 }
-

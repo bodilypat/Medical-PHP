@@ -1,60 +1,59 @@
-<!-- app/Http/Controllers/BillingController.php
- billing fields
- bill_id INT AUTO_INCREMENT PRIMARY KEY,
-    patient_id INT NOT NULL,
-    appointment_id INT NOT NULL,
-    total_amount DECIMAL(10,2) NOT NULL,
-    payment_status ENUM('Pending','Paid') DEFAULT 'Pending',
-    payment_method ENUM('Cash','Card','Insurance') DEFAULT 'Cash',
-    billing_date DATE,
-    FOREIGN KEY (patient_id) REFERENCES patients(patient_id) ON DELETE CASCADE,
-    FOREIGN KEY (appointment_id) REFERENCES appointments(appointment_id) ON DELETE CASCADE
- -->
-<?php
+<!-- Billing Full REST API -->
 
+<?php
 namespace App\Http\Controllers;
 use App\Models\Billing;
-use App\Models\Patient;
-use App\Models\Appointment;
 use Illuminate\Http\Request;
 
 class BillingController extends Controller
 {
-    // Display a listing of the bills
+    // GET /api / billings - Get all billings
     public function index()
     {
-        $bills = Billing::with(['patient', 'appointment'])->get();
-        return view('bills.index', compact('bills'));
+        $billings = Billing::all();
+        return response()->json($billings);
     }
 
-    // Show the form for creating a new bill
-    public function create()
-    {
-        $patients = Patient::all();
-        $appointments = Appointment::all();
-        return view('bills.create', compact('patients', 'appointments'));
-    }
-
-    // Store a newly created bill in storage
+    // POST /api / billings - Create a new billing
     public function store(Request $request)
     {
-        $request->validate([
-            'patient_id' => 'required|exists:patients,patient_id',
-            'appointment_id' => 'required|exists:appointments,appointment_id',
-            'total_amount' => 'required|numeric',
-            'payment_status' => 'required|in:Pending,Paid',
-            'payment_method' => 'required|in:Cash,Card,Insurance',
-            'billing_date' => 'nullable|date',
-        ]);
-        Billing::create($request->all());
-        return redirect()->route('bills.index')->with('success', 'Bill created successfully.');
+        $billing = Billing::create($request->all());
+        return response()->json($billing, 201);
     }
 
-    // Display the specified bill
-    public function show(Billing $bill)
+    // GET /api / billings / {id} - Get a billing by ID
+    public function show($id)
     {
-        $bill->load(['patient', 'appointment']);
-        return view('bills.show', compact('bill'));
+        $billing = Billing::find($id);
+        if ($billing) {
+            return response()->json($billing);
+        } else {
+            return response()->json(["message" => "Billing not found."], 404);
+        }
+    }
+
+    // PUT /api / billings / {id} - Update a billing by ID
+    public function update(Request $request, $id)
+    {
+        $billing = Billing::find($id);
+        if ($billing) {
+            $billing->update($request->all());
+            return response()->json($billing);
+        } else {
+            return response()->json(["message" => "Billing not found."], 404);
+        }
+    }
+
+    // DELETE /api / billings / {id} - Delete a billing by ID
+    public function destroy($id)
+    {
+        $billing = Billing::find($id);
+        if ($billing) {
+            $billing->delete();
+            return response()->json(["message" => "Billing deleted."]);
+        } else {
+            return response()->json(["message" => "Billing not found."], 404);
+        }
     }
 }
 

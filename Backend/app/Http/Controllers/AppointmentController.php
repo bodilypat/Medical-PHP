@@ -1,81 +1,58 @@
-<!-- app/Http/Controllers/AppointmentController.php  -->
-
+<!-- Appointment Full REST API -->
 <?php
 
 namespace App\Http\Controllers;
-
 use App\Models\Appointment;
-use App\Models\Doctor;
-use App\Models\Patient;
 use Illuminate\Http\Request;
 
 class AppointmentController extends Controller
 {
-    // Display a listing of the appointments
+    // GET /api / appointments - Get all appointments
     public function index()
     {
-        $appointments = Appointment::with(['patient', 'doctor'])->get();
-        return view('appointments.index', compact('appointments'));
+        $appointments = Appointment::all();
+        return response()->json($appointments);
     }
 
-    // Show the form for creating a new appointment
-    public function create()
-    {
-        $patients = Patient::all();
-        $doctors = Doctor::all();
-        return view('appointments.create', compact('patients', 'doctors'));
-    }
-
-    // Store a newly created appointment in storage
+    // POST /api / appointments - Create a new appointment
     public function store(Request $request)
     {
-        $request->validate([
-            'patient_id' => 'required|exists:patients,patient_id',
-            'doctor_id' => 'required|exists:doctors,doctor_id',
-            'appointment_date' => 'required|date',
-            'appointment_time' => 'required',
-            'status' => 'nullable|in:scheduled,completed,cancelled',
-        ]);
-        Appointment::create($request->all());
-        return redirect()->route('appointments.index')->with('success', 'Appointment created successfully.');
+        $appointment = Appointment::create($request->all());
+        return response()->json($appointment, 201);
     }
 
-    // Display the specified appointment
-    public function show(Appointment $appointment)
+    // GET /api / appointments / {id} - Get an appointment by ID
+    public function show($id)
     {
-        $appointment->load(['patient', 'doctor']);
-        return view('appointments.show', compact('appointment'));
+        $appointment = Appointment::find($id);
+        if ($appointment) {
+            return response()->json($appointment);
+        } else {
+            return response()->json(["message" => "Appointment not found."], 404);
+        }
     }
 
-    // Show the form for editing the specified appointment
-    public function edit(Appointment $appointment)
+    // PUT /api / appointments / {id} - Update an appointment by ID
+    public function update(Request $request, $id)
     {
-        $patients = Patient::all();
-        $doctors = Doctor::all();
-        return view('appointments.edit', compact('appointment', 'patients', 'doctors'));
+        $appointment = Appointment::find($id);
+        if ($appointment) {
+            $appointment->update($request->all());
+            return response()->json($appointment);
+        } else {
+            return response()->json(["message" => "Appointment not found."], 404);
+        }
     }
 
-    // Update the specified appointment in storage
-    public function update(Request $request, Appointment $appointment)
+    // DELETE /api / appointments / {id} - Delete an appointment by ID
+    public function destroy($id)
     {
-        $request->validate([
-            'patient_id' => 'required|exists:patients,patient_id',
-            'doctor_id' => 'required|exists:doctors,doctor_id',
-            'appointment_date' => 'required|date',
-            'appointment_time' => 'required',
-            'status' => 'nullable|in:scheduled,completed,cancelled',
-        ]);
-        $appointment->update($request->all());
-        return redirect()->route('appointments.index')->with('success', 'Appointment updated successfully.');
+        $appointment = Appointment::find($id);
+        if ($appointment) {
+            $appointment->delete();
+            return response()->json(["message" => "Appointment deleted."]);
+        } else {
+            return response()->json(["message" => "Appointment not found."], 404);
+        }
     }
-
-    // Remove the specified appointment from storage
-    public function destroy(Appointment $appointment)
-    {
-        $appointment->delete();
-        return redirect()->route('appointments.index')->with('success', 'Appointment deleted successfully.');
-    }
-
 }
-
-

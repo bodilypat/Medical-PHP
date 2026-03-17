@@ -1,5 +1,4 @@
-<!-- //app/Http/Controllers/PatientController.php --> 
-
+<!-- Patient Full REST API -->
 <?php
 
 namespace App\Http\Controllers;
@@ -9,67 +8,55 @@ use Illuminate\Http\Request;
 
 class PatientController extends Controller
 {
-    // Display a listing of the patients
+    // GET /api / patients - Get all patients
     public function index()
     {
         $patients = Patient::all();
-        return view('patients.index', compact('patients'));
+        return response()->json($patients);
     }
 
-    // Show the form for creating a new patient
-    public function create()
-    {
-        return view('patients.create');
-    }
-
-    // Store a newly created patient in storage
+    // POST /api / patients - Create a new patient
     public function store(Request $request)
     {
-        $request->validate([
-            'first_name' => 'required|string|max:50',
-            'last_name' => 'required|string|max:50',
-            'gender' => 'required|in:male,female,other',
-            'date_of_birth' => 'nullable|date', 
-            'phone' => 'nullable|string|max:15',
-            'email' => 'nullable|email|max:100',
-            'address' => 'nullable|string',
-            'blood_group' => 'nullable|in:A+,A-,B+,B-,AB+,AB-,O+,O-',
-        ]);
-        Patient::create($request->all());
-        return redirect()->route('patients.index')->with('success', 'Patient created successfully.');
+        $patient = Patient::create($request->all());
+        return response()->json($patient, 201);
     }
-    // Display the specified patient
-    public function show(Patient $patient)
-    {
-        return view('patients.show', compact('patient'));
-    }
-    // Show the form for editing the specified patient
-    public function edit(Patient $patient)
-    {
-        return view('patients.edit', compact('patient'));
-    }   
-    // Update the specified patient in storage
-    public function update(Request $request, Patient $patient)
-    {
-        $request->validate([
-            'first_name' => 'required|string|max:50',
-            'last_name' => 'required|string|max:50',
-            'gender' => 'required|in:male,female,other',
-            'date_of_birth' => 'nullable|date',
-            'phone' => 'nullable|string|max:15',
-            'email' => 'nullable|email|max:100',
-            'address' => 'nullable|string',
-            'blood_group' => 'nullable|in:A+,A-,B+,B-,AB+,AB-,O+,O-',
-        ]);
 
-        $patient->update($request->all());
-        return redirect()->route('patients.index')->with('success', 'Patient updated successfully.');
-    }
-    // Remove the specified patient from storage
-    public function destroy(Patient $patient)
+    // GET /api / patients / {id} - Get a patient by ID
+    public function show($id)
     {
-        $patient->delete();
-        return redirect()->route('patients.index')->with('success', 'Patient deleted successfully.');
-    }   
+        $patient = Patient::find($id);
+        if ($patient) {
+            return response()->json($patient);
+        } else {
+            return response()->json(["message" => "Patient not found."], 404);
+        }
+    }
+
+    // PUT /api / patients / {id} - Update a patient by ID
+    public function update(Request $request, $id)
+    {
+        $patient = Patient::find($id);
+        if ($patient) {
+            $patient->update($request->all());
+            return response()->json($patient);
+        } else {
+            return response()->json(["message" => "Patient not found."], 404);
+        }
+    }
+
+    // DELETE /api / patients / {id} - Delete a patient by ID
+    public function destroy($id)
+    {
+        $patient = Patient::find($id);
+        if ($patient) {
+            $patient->delete();
+            return response()->json(["message" => "Patient deleted."]);
+        } else {
+            return response()->json(["message" => "Patient not found."], 404);
+        }
+    }
 }
 
+
+    
