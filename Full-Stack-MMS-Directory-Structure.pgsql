@@ -9,43 +9,69 @@ Full-Stack-Medical-Management System-Directory-Structure
 │   ├── app/
 │   │   ├── Http/   
 │   │   │   ├── Controllers/
+│   │   │   │   ├── AuthController.php
 │   │   │   │   ├── PatientController.php
 │   │   │   │   ├── DoctorController.php
 │   │   │   │   ├── AppointmentController.php
+│   │   │   │   ├── MedicalRecordController.php
+│   │   │   │   ├── PrescriptionController.php
 │   │   │   │   └── BillingController.php
+│   │   │   ├── Requests/
+│   │   │   │   ├── StorePatientRequest.php
+│   │   │   │   ├── StoreDoctorRequest.php
+│   │   │   │   └── StoreAppointmentRequest.php
 │   │   │   └── Middleware/
 │   │   │       ├── Authenticate.php                              # check user is logged in.
 │   │   │       ├── EncryptCookies.php                            # Encrypts cookies before storing them.
+│   │   │       ├── PreventRequestsDuringMaintenance.php
 │   │   │       ├── RedirectIfAuthenticated.php                   # Prevents logged-in users from accessing login or register page again.
+│   │   │       ├── TrimStrings.php
+│   │   │       ├── TrustHosts.php
+│   │   │       ├── TrustProxies.php
+│   │   │       ├── CheckAdmin.php
+│   │   │       ├── CheckDoctor.php
+│   │   │       ├── CheckPatient.php
 │   │   │       └── VerifyCsrfToken.php                           # Protects the application from CSRF attacks.
-│   │   ├── Models/                
+│   │   ├── Models/   
+│   │   │   ├── User.php               
 │   │   │   ├── Patient.php       
 │   │   │   ├── Doctor.php   
-│   │   │   ├── Appointment.php      
-│   │   │   └── Prescription.php
+│   │   │   ├── Appointment.php
+│   │   │   ├── MedicalRecord.php
+│   │   │   ├── Prescription.php      
+│   │   │   └── billing.php
 │   │   └── Providers/
 │   │       ├── AppServiceProvider.php
 │   │       ├── AuthServiceProvider.php
 │   │       └── RouteServiceProvider.php
+│   ├── database/
+│   │   ├── migrations/
+│   │   │   ├── create_patients_table.php
+│   │   │   ├── create_doctors_table.php
+│   │   │   ├── create_appointments_table.php
+│   │   │   ├── create_medical_records_table.php
+│   │   │   ├── create_prescriptions_table.php
+│   │   │   ├── create_billing_table.php
+│   │   │   └── create_users_table.php
+│   │  	├── seeders/
+│   │   └──   
+│   ├── routes/  
+│   │  	├── web.php                                          # web pages
+│   │  	├── api.php                                          # REST APIs 
+│   │  	├── console.php
+│   │   └── channels.php                
 │   ├── bootstrap/           
 │   │   ├── 
 │   │   └──  
 │   ├── config/
 │   │   ├── 
 │   │   └──   
-│   ├── database/
-│   │   ├── 
-│   │  	├── 
-│   │   └──                  
 │   ├── public/  
 │   │  	├── 
 │   │   └──  
 │   ├── resources/  
 │   │  	├── 
 │   │   └──   
-│   ├── routes/  
-│   │  	├── 
-│   │   └──  
 │   ├── storage/  
 │   │  	├── 
 │   │   └──  
