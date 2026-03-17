@@ -1,33 +1,45 @@
-<!-- REST routing -->
+<!-- //routes/api.php -->
 <?php
 
-require_once '../Http/controllers/PatientController.php';
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\{
+        AuthController,
+        PatientController,
+        DoctorController,
+        AppointmentController,
+        PrescriptionController,
+        MedicalRecordController
+        BillingController
+};
+
+// Public Routes (No Auth Required)
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login', [AuthController::class, 'login']);
+
+// Protected Routes (Auth Required)
+Route::middleware('auth:sanctum')->group(function () {
+    // Patient Routes
+    Route::apiResource('patients', PatientController::class);
+
+    // Doctor Routes
+    Route::apiResource('doctors', DoctorController::class);
+
+    // Appointment Routes
+    Route::apiResource('appointments', AppointmentController::class);
+
+    // Prescription Routes
+    Route::apiResource('prescriptions', PrescriptionController::class);
+
+    // Medical Record Routes
+    Route::apiResource('medical-records', MedicalRecordController::class);
+
+    // Billing Routes
+    Route::apiResource('billing', BillingController::class);
+
+    // Logout Route
+    Route::post('/logout', [AuthController::class, 'logout']);
+});
 
 
-$request = $_SERVER['REQUEST_URI'];
-$method = $_SERVER['REQUEST_METHOD'];
-
-// Remove query string
-$request = strtok($request, '?');
-
-// Routes 
-if ($request === '/api/patients' && $method === 'GET') {
-    $controller = new PatientController();
-    $controller->getAllPatients();
-} elseif (preg_match('/\/api\/patients\/(\d+)/', $request, $matches) && $method === 'GET') {
-    $controller = new PatientController();
-    $controller->getPatientById($matches[1]);
-} elseif ($request === '/api/patients' && $method === 'POST') {
-    $controller = new PatientController();
-    $controller->createPatient();
-} elseif (preg_match('/\/api\/patients\/(\d+)/', $request, $matches) && $method === 'PUT') {
-    $controller = new PatientController();
-    $controller->updatePatient($matches[1]);
-} elseif (preg_match('/\/api\/patients\/(\d+)/', $request, $matches) && $method === 'DELETE') {
-    $controller = new PatientController();
-    $controller->deletePatient($matches[1]);
-} else {
-    http_response_code(404);
-    echo json_encode(["message" => "Endpoint not found."]);
-}
 
